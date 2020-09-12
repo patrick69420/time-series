@@ -1,11 +1,12 @@
 import numpy as np
 
-def generator(data, lookback, delay, min_index, max_index,
+
+def generator(data, lookback=0, delay=0, min_index=0, max_index=0,
               shuffle=False, batch_size=128, step=6):
     if max_index is None:
         # max allowable index
         # must have a buffer of "delay" steps ahead
-        max_index = len(data) - delay + 1
+        max_index = len(data) - delay - 1
     i = min_index + lookback
     while 1:
         # shuffle: randomly selects batch_size many indices

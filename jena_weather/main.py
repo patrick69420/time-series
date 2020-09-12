@@ -2,6 +2,10 @@ import os
 import numpy as np
 
 from generator import generator
+from models import baseline_model, densely_connected_model
+from keras import layers
+from keras.models import Sequential
+
 
 # a timestep is 10 minutes
 # problem formulation: given data going as far back as "lookback" timesteps and sampled
@@ -34,7 +38,7 @@ def main():
     # data normalization
     mean = float_data[:max_index].mean(axis=0)
     float_data = float_data - mean
-    std = float_data[:max_index].mean(axis=0)
+    std = float_data[:max_index].std(axis=0)
     float_data = float_data/std
 
     lookback = 1440 # 10 days
@@ -73,6 +77,18 @@ def main():
     # total steps to draw from the generators to see the entire set
     val_steps = (val_indices[1] - val_indices[0] - lookback)
     test_steps = (len(float_data) - test_indices[0] - lookback)
+    validation_steps = (val_indices[1]-val_indices[0])//batch_size
+
+    model = densely_connected_model(lookback, step, float_data.shape[-1])
+
+    model.compile(optimizer='rmsprop', loss='mae')
+    history = model.fit_generator(train_gen,
+                                  steps_per_epoch=500,
+                                  epochs=20,
+                                  validation_data=val_gen,
+                                  validation_steps=validation_steps,
+                                  #validation_steps=val_steps,
+                                  verbose=1)
 
 
 if __name__ == "__main__":
